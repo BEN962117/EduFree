@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: edufree-services
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: ALLOWED_ORIGIN
+        value: https://ben962117.github.io
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: FEEDBACK_ADMIN_USER
+        sync: false
+      - key: FEEDBACK_ADMIN_PASSWORD
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: FEEDBACK_TO_EMAIL
+        sync: false
+      - key: FEEDBACK_FROM_EMAIL
+        sync: false
