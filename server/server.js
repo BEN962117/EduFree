@@ -148,37 +148,155 @@ app.post("/admin/feedback/:id/status", requireAdmin, async (req, res) => {
   }
 });
 
-app.post("/admin/feedback/:id/delete", requireAdmin, async (req, res) => {
-  try {
-    const id = Number(req.params.id);
-
-    if (!Number.isSafeInteger(id) || id < 1) {
-      return res.status(400).json({ error: "Invalid feedback ID." });
-    }
-
-    const { data, error } = await supabase
-      .from("feedback")
-      .delete()
-      .eq("id", id)
-      .select("id")
-      .single();
-
-    if (error) throw error;
-
-    return res.json({ ok: true, deleted: data.id });
-  } catch (error) {
-    console.error("Feedback deletion failed:", error.message);
-    return res.status(500).json({ error: "Could not delete feedback." });
-  }
-});
 
 app.get("/admin/feedback", requireAdmin, async (_req, res) => {
   try {
     const entries = await readFeedback();
-    const esc = value => String(value).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
-    const rows = entries.map(item => `<article><div class="meta">${esc(item.category)} · ${esc(new Date(item.created_at).toLocaleString())} · ${esc(item.status || "new")}</div><p>${esc(item.message).replace(/\n/g,"<br>")}</p></article>`).join("");
-    res.type("html").send(`<!doctype html><html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>EduFree feedback</title><style>body{font:16px/1.5 system-ui;max-width:850px;margin:35px auto;padding:0 16px;color:#172b3a;background:#f3f6f9}article{background:white;border:1px solid #dce5eb;border-radius:12px;padding:16px;margin:12px 0}.meta{font-size:13px;color:#176b87;font-weight:700}h1{color:#102b46}.empty{color:#657889}</style><h1>EduFree feedback</h1><p>${entries.length} submission(s)</p>${rows || '<p class="empty">No feedback received yet.</p>'}</html>`);
-  } catch (error) { console.error("Admin feedback load failed:", error.message); res.status(500).send("Could not load feedback."); }
+
+    const esc = value => String(value).replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;",
+      '"': "&quot;", "'": "&#39;"
+    }[c]));
+
+    const rows = entries.map(item => `
+      <article>
+        <div class="meta">
+          ${esc(item.category)} ·
+          ${esc(new Date(item.created_at).toLocaleString())}
+        </div>
+
+        <p>${esc(item.message).replace(/\n/g, "<br>")}</p>
+
+        <div class="controls">
+          <label>
+            Status:
+            <select class="status" data-id="${esc(item.id)}">
+              <option value="new" ${item.status === "new" ? "selected" : ""}>New</option>
+              <option value="reviewed" ${item.status === "reviewed" ? "selected" : ""}>Reviewed</option>
+              <option value="resolved" ${item.status === "resolved" ? "selected" : ""}>Resolved</option>
+            </select>
+          </label>
+
+          <button class="delete" data-id="${esc(item.id)}">
+            Delete
+          </button>
+        </div>
+      </article>
+    `).join("");
+
+    res.type("html").send(`<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>EduFree Feedback Dashboard</title>
+<style>
+body {
+  font: 16px/1.5 system-ui;
+  max-width: 850px;
+  margin: 35px auto;
+  padding: 0 16px;
+  color: #172b3a;
+  background: #f3f6f9;
+}
+article {
+  background: white;
+  border: 1px solid #dce5eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+}
+.meta {
+  font-size: 13px;
+  color: #176b87;
+  font-weight: 700;
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 15px;
+}
+select, button {
+  padding: 9px 12px;
+  border-radius: 7px;
+  border: 1px solid #ccd6df;
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+.delete {
+  background: #fff0f0;
+  color: #b42318;
+  border-color: #f2c5c5;
+}
+#notice {
+  font-weight: 600;
+}
+</style>
+</head>
+<body>
+<h1>EduFree Feedback</h1>
+<p>${entries.length} submission(s)</p>
+<p id="notice" aria-live="polite"></p>
+${rows || '<p>No feedback received yet.</p>'}
+
+<script>
+const notice = document.getElementById("notice");
+
+document.querySelectorAll(".status").forEach(select => {
+  select.addEventListener("change", async () => {
+    try {
+      const response = await fetch(
+        "/admin/feedback/" + encodeURIComponent(select.dataset.id) + "/status",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ status: select.value })
+        }
+      );
+
+      if (!response.ok) throw new Error("Update failed.");
+      notice.textContent = "Feedback status updated.";
+    } catch {
+      notice.textContent = "Could not update status. Please refresh and try again.";
+    }
+  });
+});
+
+document.querySelectorAll(".delete").forEach(button => {
+  button.addEventListener("click", async () => {
+    if (!confirm("Are you sure you want to permanently delete this feedback?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "/admin/feedback/" + encodeURIComponent(button.dataset.id) + "/delete",
+        {
+          method: "POST",
+          credentials: "same-origin"
+        }
+      );
+
+      if (!response.ok) throw new Error("Delete failed.");
+      notice.textContent = "Feedback deleted.";
+      button.closest("article").remove();
+    } catch {
+      notice.textContent = "Could not delete feedback. Please refresh and try again.";
+    }
+  });
+});
+</script>
+</body>
+</html>`);
+  } catch (error) {
+    console.error("Admin feedback load failed:", error.message);
+    res.status(500).send("Could not load feedback.");
+  }
 });
 
 app.post("/api/tutor", tutorLimiter, async (req, res) => {
