@@ -119,6 +119,59 @@ app.post("/api/feedback", feedbackLimiter, async (req, res) => {
   }
 });
 
+app.post("/admin/feedback/:id/status", requireAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { status } = req.body || {};
+
+    if (!Number.isSafeInteger(id) || id < 1) {
+      return res.status(400).json({ error: "Invalid feedback ID." });
+    }
+
+    if (!["new", "reviewed", "resolved"].includes(status)) {
+      return res.status(400).json({ error: "Invalid feedback status." });
+    }
+
+    const { data, error } = await supabase
+      .from("feedback")
+      .update({ status })
+      .eq("id", id)
+      .select("id, status")
+      .single();
+
+    if (error) throw error;
+
+    return res.json({ ok: true, feedback: data });
+  } catch (error) {
+    console.error("Feedback status update failed:", error.message);
+    return res.status(500).json({ error: "Could not update feedback." });
+  }
+});
+
+app.post("/admin/feedback/:id/delete", requireAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isSafeInteger(id) || id < 1) {
+      return res.status(400).json({ error: "Invalid feedback ID." });
+    }
+
+    const { data, error } = await supabase
+      .from("feedback")
+      .delete()
+      .eq("id", id)
+      .select("id")
+      .single();
+
+    if (error) throw error;
+
+    return res.json({ ok: true, deleted: data.id });
+  } catch (error) {
+    console.error("Feedback deletion failed:", error.message);
+    return res.status(500).json({ error: "Could not delete feedback." });
+  }
+});
+
 app.get("/admin/feedback", requireAdmin, async (_req, res) => {
   try {
     const entries = await readFeedback();
