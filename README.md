@@ -20,3 +20,8 @@ The tutor in this starter is a guided demo, not a connected generative AI model.
 
 ## Offline note
 The website shell and bundled sample lessons can be cached. The AI tutor needs internet access. Browser storage may be cleared by the user or device, and service workers require HTTPS (GitHub Pages provides HTTPS).
+
+
+## Expanded learning library
+
+The current catalogue contains 8 subjects with 50 topics each (400 topics total). The 3 original sample lessons in each subject retain their detailed notes and quizzes. Newly added topics include introductory guidance and a practice prompt; they can be expanded into full lesson notes and topic-specific quizzes in later updates.
