@@ -1,0 +1,18 @@
+{
+  "name": "EduFree \u2014 Learn without limits",
+  "short_name": "EduFree",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f6f9",
+  "theme_color": "#102b46",
+  "description": "Free learning, lessons, quizzes and study support for every learner.",
+  "icons": [
+    {
+      "src": "assets/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
