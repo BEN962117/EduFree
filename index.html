@@ -181,6 +181,7 @@ const topicImages = {
 
 
 function openTopic(sid, tid) {
+  function openTopic(sid, tid) {
   let s = subjects.find(x => x.id === sid);
   let tp = s.topics.find(x => x[0] === tid);
 
@@ -191,118 +192,231 @@ function openTopic(sid, tid) {
   document.getElementById('lessonLevel').textContent =
     t('level') + ': ' + tp[2];
 
-  let plan = learningPlan(s, tp);
+  let saved = localStorage.getItem('ef_project_' + sid + '_' + tid) || '';
 
+  let imageHTML = topicImages[tid] ? `
+    <figure class="topic-visual">
+      <img src="${topicImages[tid].src}"
+        alt="${topicImages[tid].alt}"
+        loading="lazy"
+        onerror="this.parentElement.hidden=true">
+      <figcaption>${topicImages[tid].caption}</figcaption>
+    </figure>
+  ` : '';
+
+  let waterLesson = `
+    <h2>1. What is the water cycle?</h2>
+    <p>The <strong>water cycle</strong> is the continuous movement of water
+    between the Earth's surface and the atmosphere. Water moves through the
+    air, clouds, rivers, lakes, oceans, soil and living things.</p>
+
+    <p>The water cycle is called a cycle because it repeats. Water does not
+    simply disappear when it dries or falls as rain. It changes location and
+    sometimes changes state—from liquid water to water vapour and back again.</p>
+
+    <div class="callout">
+      <strong>Remember:</strong> The Sun provides much of the energy that
+      drives the water cycle. Gravity helps water fall from clouds and flow
+      downhill.
+    </div>
+
+    <h2>2. The stages of the water cycle</h2>
+
+    <h3>A. Evaporation</h3>
+    <p><strong>Evaporation</strong> happens when liquid water gains heat and
+    changes into water vapour, a gas that mixes with the air.</p>
+    <p>The Sun warms water in oceans, lakes, rivers and puddles. Some water
+    molecules gain enough energy to leave the liquid and enter the air as
+    vapour.</p>
+    <p><strong>Example:</strong> A puddle becomes smaller after a sunny day
+    because some of its water evaporates.</p>
+
+    <h3>B. Transpiration</h3>
+    <p><strong>Transpiration</strong> is the release of water vapour from
+    plants, mainly through tiny openings in their leaves called stomata.</p>
+    <p>Plants absorb water through their roots. Some of this water travels
+    through the plant and escapes from the leaves into the atmosphere as
+    water vapour.</p>
+    <p><strong>Example:</strong> Trees and other plants release water vapour
+    into the air around them.</p>
+
+    <h3>C. Condensation</h3>
+    <p><strong>Condensation</strong> happens when water vapour cools and
+    changes into tiny liquid water droplets.</p>
+    <p>As moist air rises, it usually cools. Water vapour can then condense
+    around tiny particles in the air, forming droplets. Large groups of
+    these droplets make clouds.</p>
+    <p><strong>Example:</strong> Water droplets forming on the outside of a
+    cold bottle are caused by condensation. The water comes from the air,
+    not through the bottle.</p>
+
+    <h3>D. Precipitation</h3>
+    <p><strong>Precipitation</strong> is water that falls from clouds to the
+    Earth's surface.</p>
+    <p>Cloud droplets can join together and grow. When they become heavy
+    enough, water falls. Depending on atmospheric conditions, precipitation
+    can be rain, snow, sleet or hail.</p>
+    <p><strong>Example:</strong> Rain falling onto roofs, roads, farms and
+    rivers is precipitation.</p>
+
+    <h3>E. Collection and accumulation</h3>
+    <p>After precipitation reaches the ground, water may collect in rivers,
+    lakes, oceans, ponds and other bodies of water. This is often called
+    <strong>collection</strong> or <strong>accumulation</strong>.</p>
+    <p>Some water is stored underground, in soil and rocks. Water can remain
+    in these places for different lengths of time before moving again.</p>
+
+    <h3>F. Runoff</h3>
+    <p><strong>Runoff</strong> is water that flows over the land into streams,
+    rivers, lakes and eventually oceans.</p>
+    <p>Runoff is more likely when rain falls faster than the ground can absorb
+    it, or when the ground is already saturated.</p>
+
+    <h3>G. Infiltration</h3>
+    <p><strong>Infiltration</strong> is the process by which water enters the
+    soil from the ground surface. Some of this water moves deeper and
+    becomes groundwater.</p>
+    <p>Groundwater can slowly move through soil and rock. It may eventually
+    reach springs, rivers, lakes or the ocean.</p>
+
+    <h2>3. How the whole cycle works</h2>
+    <ol>
+      <li>The Sun warms water on Earth's surface.</li>
+      <li>Some liquid water evaporates into water vapour.</li>
+      <li>Plants also release water vapour through transpiration.</li>
+      <li>Warm, moist air rises and cools.</li>
+      <li>Water vapour condenses into tiny droplets and clouds form.</li>
+      <li>Water falls from clouds as precipitation.</li>
+      <li>Water collects in rivers, lakes and oceans, flows as runoff,
+      or enters the ground through infiltration.</li>
+      <li>The process continues as water moves and changes state again.</li>
+    </ol>
+
+    <div class="callout">
+      <strong>Follow the journey:</strong>
+      Surface water → evaporation → water vapour → condensation →
+      clouds → precipitation → collection and movement → the cycle repeats.
+    </div>
+
+    <h2>4. A real-life example</h2>
+    <p>Imagine rain falling onto a school playground. Some water flows into
+    drains and nearby streams. Some enters the soil. Later, sunlight warms
+    water in puddles and some evaporates. Plants around the school also
+    release water vapour. The vapour rises, cools and may contribute to
+    cloud formation. Later, precipitation may fall again.</p>
+
+    <h2>5. Why is the water cycle important?</h2>
+    <ul>
+      <li><strong>Provides fresh water:</strong> It helps move water through
+      the environment and supports the supply of freshwater.</li>
+      <li><strong>Supports plants:</strong> Rain and soil water help plants
+      grow and produce food.</li>
+      <li><strong>Supports animals and people:</strong> Living things need
+      water to survive.</li>
+      <li><strong>Helps agriculture:</strong> Rainfall supplies water to
+      many crops and pastures.</li>
+      <li><strong>Affects weather:</strong> Evaporation, condensation and
+      precipitation are important parts of weather and cloud formation.</li>
+      <li><strong>Moves water through ecosystems:</strong> Water travels
+      between the atmosphere, land, rivers and living things.</li>
+    </ul>
+
+    <h2>6. Important vocabulary</h2>
+    <ul>
+      <li><strong>Water vapour:</strong> Water in its gaseous state.</li>
+      <li><strong>Evaporation:</strong> Liquid water changing into gas.</li>
+      <li><strong>Transpiration:</strong> Water vapour released by plants.</li>
+      <li><strong>Condensation:</strong> Water vapour changing into liquid droplets.</li>
+      <li><strong>Precipitation:</strong> Water falling from clouds.</li>
+      <li><strong>Runoff:</strong> Water flowing over the land.</li>
+      <li><strong>Infiltration:</strong> Water entering the soil.</li>
+      <li><strong>Groundwater:</strong> Water stored beneath Earth's surface.</li>
+      <li><strong>Collection:</strong> Water gathering in places such as
+      rivers, lakes and oceans.</li>
+    </ul>
+
+    <h2>7. Check your understanding</h2>
+    <p><strong>Question 1:</strong> What is the water cycle?</p>
+    <p><strong>Answer:</strong> The continuous movement of water between
+    Earth's surface and the atmosphere.</p>
+
+    <p><strong>Question 2:</strong> What provides much of the energy for
+    evaporation?</p>
+    <p><strong>Answer:</strong> Heat from the Sun warms surface water and
+    helps it evaporate.</p>
+
+    <p><strong>Question 3:</strong> What happens during condensation?</p>
+    <p><strong>Answer:</strong> Water vapour cools and changes into tiny
+    liquid droplets, which can form clouds.</p>
+
+    <p><strong>Question 4:</strong> What is the difference between runoff
+    and infiltration?</p>
+    <p><strong>Answer:</strong> Runoff flows over the land. Infiltration
+    happens when water enters the soil.</p>
+
+    <p><strong>Question 5:</strong> Why is the water cycle important?</p>
+    <p><strong>Answer:</strong> It moves water through the environment and
+    helps supply water needed by people, plants and animals.</p>
+
+    <h2>8. Short learning activity</h2>
+    <p>Observe a puddle, wet ground or wet clothes drying in a safe place.
+    Write down what you notice over time. Explain how sunlight, air and
+    evaporation may be involved. Do not taste or drink collected rainwater
+    or puddle water.</p>
+
+    <h2>9. Lesson summary</h2>
+    <p>The water cycle is a continuous process. Evaporation and transpiration
+    move water into the atmosphere. Condensation helps clouds form.
+    Precipitation brings water back to Earth's surface. Collection, runoff
+    and infiltration help water move and be stored. The Sun and gravity
+    help drive this important natural process.</p>
+  `;
+
+  let plan = learningPlan(s, tp);
   let practice = plan.practice
     .map((x, i) => `<li><strong>Task ${i + 1}:</strong> ${x}</li>`)
     .join('');
 
-  let saved = localStorage.getItem('ef_project_' + sid + '_' + tid) || '';
-
-  const waterCycleLesson = `
-    <h2>What is the water cycle?</h2>
-    <p>The <strong>water cycle</strong> is the continuous movement of water between the Earth's surface, underground and the atmosphere. Water changes location and sometimes changes state, but the same water is continually recycled. It is also called the <strong>hydrological cycle</strong>.</p>
-    <p>Water can be a liquid (in rivers and lakes), a solid (ice and snow), or a gas (water vapour). The water cycle connects these forms and moves water around the planet.</p>
-
-    <h3>Why does the water cycle happen?</h3>
-    <p>The Sun provides most of the energy that drives the cycle by warming water and causing evaporation. Gravity pulls water back towards the ground as precipitation and moves it downhill through rivers and runoff. Together, solar energy and gravity keep water moving.</p>
-
-    <h3>1. Evaporation</h3>
-    <p><strong>Evaporation</strong> happens when liquid water gains heat energy and changes into water vapour, which mixes with the air. It occurs at the surfaces of oceans, lakes, rivers, wet soil and puddles. Warmer conditions, moving air and a larger exposed water surface can increase the rate of evaporation.</p>
-    <p><em>Example:</em> After rain, a puddle gradually becomes smaller on a warm day because some of its liquid water evaporates. The water has not simply disappeared; it has become water vapour in the air.</p>
-
-    <h3>2. Transpiration</h3>
-    <p><strong>Transpiration</strong> is the release of water vapour from plants, mainly through tiny openings in their leaves called <strong>stomata</strong>. Plants absorb water through their roots, move it through their stems, and release some of it into the atmosphere. Evaporation and transpiration together are sometimes called <strong>evapotranspiration</strong>.</p>
-    <p><em>Example:</em> A tree takes up water from the soil. Some water is used by the plant, while some leaves as water vapour through the leaves.</p>
-
-    <h3>3. Condensation and cloud formation</h3>
-    <p><strong>Condensation</strong> occurs when water vapour cools and changes into tiny liquid droplets. In the atmosphere, water vapour can condense onto very small particles of dust or salt. Many droplets or ice crystals together form a cloud. Clouds are not made of invisible water vapour; they contain tiny liquid droplets, ice crystals, or both.</p>
-    <p><em>Example:</em> Tiny droplets appearing on the outside of a cold bottle come from water vapour in the surrounding air cooling against the bottle. This is condensation.</p>
-
-    <h3>4. Precipitation</h3>
-    <p><strong>Precipitation</strong> is water that falls from clouds to Earth's surface. It includes rain, snow, sleet and hail. Cloud droplets or ice crystals grow; when they become heavy enough, they may fall under gravity. The type of precipitation depends partly on the temperatures in the cloud and in the air below it.</p>
-    <p><em>Example:</em> Rain falling onto a school field is precipitation. Some of that water may soak into the soil, while some flows across the surface.</p>
-
-    <h3>5. Collection, runoff and infiltration</h3>
-    <p><strong>Collection</strong> is the gathering of water in oceans, lakes, rivers and other water bodies. <strong>Runoff</strong> is water that flows over the land into streams and rivers, often eventually reaching lakes or oceans. <strong>Infiltration</strong> happens when water soaks into the soil. Some of it moves deeper and becomes groundwater, which can slowly flow and may feed springs and rivers.</p>
-    <p>Not all precipitation follows the same path. Some is taken up by plants, some flows over the land, some enters the ground, and some may remain temporarily as snow or ice.</p>
-
-    <h3>How the stages connect</h3>
-    <ol>
-      <li>The Sun warms surface water, and some liquid water evaporates.</li>
-      <li>Plants also release water vapour through transpiration.</li>
-      <li>As moist air rises and cools, water vapour condenses into droplets or ice crystals, helping clouds form.</li>
-      <li>Water returns to the surface as precipitation when droplets or ice particles become heavy enough.</li>
-      <li>Water collects in water bodies, flows as runoff, or infiltrates the ground.</li>
-      <li>Energy from the Sun and gravity keep the movement going. The cycle repeats continuously.</li>
-    </ol>
-
-    <h3>Why is the water cycle important?</h3>
-    <ul>
-      <li>It continually moves and redistributes fresh water through the environment.</li>
-      <li>It provides water that people, animals and plants need to live.</li>
-      <li>It helps refill rivers, lakes, reservoirs and underground water stores.</li>
-      <li>It influences weather, clouds, rainfall and the movement of heat around Earth.</li>
-      <li>It supports farming, ecosystems and many human activities.</li>
-    </ul>
-
-    <h3>Key vocabulary</h3>
-    <dl>
-      <dt><strong>Water vapour</strong></dt><dd>Water in its gas state.</dd>
-      <dt><strong>Evaporation</strong></dt><dd>The change from liquid water to water vapour.</dd>
-      <dt><strong>Transpiration</strong></dt><dd>The release of water vapour from plants, mainly through leaves.</dd>
-      <dt><strong>Condensation</strong></dt><dd>The change of water vapour into liquid droplets.</dd>
-      <dt><strong>Precipitation</strong></dt><dd>Water falling from clouds as rain, snow, sleet or hail.</dd>
-      <dt><strong>Runoff</strong></dt><dd>Water flowing over the land surface.</dd>
-      <dt><strong>Infiltration</strong></dt><dd>Water soaking into the ground.</dd>
-      <dt><strong>Groundwater</strong></dt><dd>Water stored beneath Earth's surface in soil and rock spaces.</dd>
-    </dl>
-
-    <h3>Check your understanding</h3>
-    <ol>
-      <li><strong>What supplies most of the energy that drives the water cycle?</strong><br>Answer: The Sun heats surface water and provides energy for evaporation.</li>
-      <li><strong>How is evaporation different from condensation?</strong><br>Answer: Evaporation changes liquid water into water vapour; condensation changes water vapour into liquid droplets.</li>
-      <li><strong>What is transpiration?</strong><br>Answer: It is the release of water vapour from plants, mainly through tiny openings in their leaves.</li>
-      <li><strong>What are three possible paths for rainwater after it reaches the ground?</strong><br>Answer: It can flow over the surface as runoff, soak into the ground through infiltration, or be taken up by plants.</li>
-      <li><strong>Why is the water cycle described as continuous?</strong><br>Answer: Water keeps moving between the surface, underground and atmosphere through repeating processes.</li>
-    </ol>
-
-    <div class="callout"><strong>Lesson summary</strong><br>The Sun provides energy for evaporation and transpiration. Water vapour cools and condenses to help form clouds. Water returns as precipitation, then collects, flows as runoff or enters the ground. These connected processes continuously recycle Earth's water.</div>
-
-    <h3>Try a safe observation</h3>
-    <p>Observe a small puddle after rain from a safe place. Record its approximate size and the weather conditions at different times. Does it become smaller on a warm, dry or windy day? Explain how evaporation may be involved. Do not drink or touch unknown standing water.</p>
-  `;
-
-  const standardLesson = `
+  let otherLesson = `
     <h2>${tp[1]}</h2>
     <h3>1. Understand the concept</h3>
     <p>${tp[3]}</p>
-    <div class="callout"><strong>Worked / real-world example</strong><br>${tp[4]}</div>
-    <h3>2. Connect it to real life</h3><p>${plan.real}</p>
-    <h3>3. Guided practice</h3><ol>${practice}</ol>
-    <h3>4. Your subject project</h3><p>${plan.project}</p>
+    <div class="callout">
+      <strong>Worked / real-world example</strong><br>
+      ${tp[4]}
+    </div>
+    <h3>2. Connect it to real life</h3>
+    <p>${plan.real}</p>
+    <h3>3. Guided practice</h3>
+    <ol>${practice}</ol>
+    <h3>4. Your subject project</h3>
+    <p>${plan.project}</p>
     <p><strong>What to submit:</strong> ${plan.deliver}</p>
   `;
 
-  document.getElementById('lessonContent').innerHTML = `
-    ${topicImages[tid] ? `
-      <figure class="topic-visual">
-        <img src="${topicImages[tid].src}" alt="${topicImages[tid].alt}"
-          loading="lazy" onerror="this.parentElement.hidden=true">
-        <figcaption>${topicImages[tid].caption}</figcaption>
-      </figure>
-    ` : ''}
-    ${tid === 'water' ? waterCycleLesson : standardLesson}
-
+  let projectHTML = `
     <h3>Project workspace</h3>
-    <p class="muted">Write your plan, calculations, observations, story draft or project notes here. It is saved only in this browser on this device.</p>
-    <textarea id="projectWork" class="field" rows="7" style="width:100%;resize:vertical" placeholder="My project work…">${saved.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
-    <button class="btn small" style="margin-top:9px" onclick="saveProjectWork()">Save my project work</button>
-    <span id="projectSaved" class="muted" style="margin-left:10px" aria-live="polite"></span>
+    <p class="muted">Write your observations, answers or project notes here.
+    Your work is saved in this browser on this device.</p>
+    <textarea id="projectWork" class="field" rows="7"
+      style="width:100%;resize:vertical"
+      placeholder="My project work…">${saved.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
+    <button class="btn small" style="margin-top:9px"
+      onclick="saveProjectWork()">Save my project work</button>
+    <span id="projectSaved" class="muted"
+      style="margin-left:10px" aria-live="polite"></span>
     <h3>Reflect and improve</h3>
-    <ul><li>What did you understand best?</li><li>What evidence, calculation or example supports your answer?</li><li>What would you improve if you did this project again?</li></ul>
-    <p class="muted">Complete the short quiz to check your understanding. A project is a chance to practise and improve, not just to get a score.</p>
+    <ul>
+      <li>What did you understand best?</li>
+      <li>What evidence or example supports your answer?</li>
+      <li>What would you like to learn more about?</li>
+    </ul>
   `;
+
+  document.getElementById('lessonContent').innerHTML =
+    imageHTML +
+    (tid === 'water' ? waterLesson : otherLesson) +
+    projectHTML;
 
   let isDone = done.includes(sid + ':' + tid);
 
@@ -319,7 +433,6 @@ function openTopic(sid, tid) {
 
   showView('lesson');
 }
-
 function saveProjectWork(){if(!currentTopic)return;let key='ef_project_'+currentTopic.subject.id+'_'+currentTopic.topic[0];localStorage.setItem(key,document.getElementById('projectWork').value);document.getElementById('projectSaved').textContent='Saved on this device.'}
 function answer(i){let tp=currentTopic.topic,f=document.getElementById('quizFeedback');f.className='feedback show '+(i===tp[7]?'good':'bad');f.textContent=(i===tp[7]?t('correct'):t('tryAgain'))+tp[8];if(i===tp[7])completeTopic()}
 function completeTopic(){if(!currentTopic)return;let key=currentTopic.subject.id+':'+currentTopic.topic[0];if(!done.includes(key)){done.push(key);localStorage.setItem('ef_done',JSON.stringify(done));renderHome();renderProgress()}document.getElementById('completeBtn').innerHTML='✓ '+t('complete')}
