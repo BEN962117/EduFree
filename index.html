@@ -179,17 +179,103 @@ const topicImages = {
   }
 };
 
-function openTopic(sid,tid){let s=subjects.find(x=>x.id===sid),tp=s.topics.find(x=>x[0]===tid);currentTopic={subject:s,topic:tp};document.getElementById('lessonSubject').textContent=subjectName(s);document.getElementById('lessonTitle').textContent=tp[1];document.getElementById('lessonLevel').textContent=t('level')+': '+tp[2];let plan=learningPlan(s,tp);let practice=plan.practice.map((x,i)=>`<li><strong>Task ${i+1}:</strong> ${x}</li>`).join('');let saved=localStorage.getItem('ef_project_'+sid+'_'+tid)||'';document.getElementById('lessonContent')${topicImages[tid] ? `
-  <figure class="topic-visual">
-    <img
-      src="${topicImages[tid].src}"
-      alt="${topicImages[tid].alt}"
-      loading="lazy"
-      onerror="this.parentElement.hidden=true"
-    >
-    <figcaption>${topicImages[tid].caption}</figcaption>
-  </figure>
-` : ''}.innerHTML=`<h2>${tp[1]}</h2><h3>1. Understand the concept</h3><p>${tp[3]}</p><div class="callout"><strong>Worked / real-world example</strong><br>${tp[4]}</div><h3>2. Connect it to real life</h3><p>${plan.real}</p><h3>3. Guided practice</h3><ol>${practice}</ol><h3>4. Your subject project</h3><p>${plan.project}</p><p><strong>What to submit:</strong> ${plan.deliver}</p><h3>5. Project workspace</h3><p class="muted">Write your plan, calculations, observations, story draft or project notes here. It is saved only in this browser on this device.</p><textarea id="projectWork" class="field" rows="7" style="width:100%;resize:vertical" placeholder="My project work…">${saved.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea><button class="btn small" style="margin-top:9px" onclick="saveProjectWork()">Save my project work</button><span id="projectSaved" class="muted" style="margin-left:10px" aria-live="polite"></span><h3>6. Reflect and improve</h3><ul><li>What did you understand best?</li><li>What evidence, calculation or example supports your answer?</li><li>What would you improve if you did this project again?</li></ul><p class="muted">Complete the short quiz to check your understanding. A project is a chance to practise and improve, not just to get a score.</p>`;let isDone=done.includes(sid+':'+tid);document.getElementById('completeBtn').innerHTML=isDone?'✓ '+t('complete'):'✓ '+t('markDone');document.getElementById('quizArea').innerHTML=`<p><strong>${tp[5]}</strong></p>${tp[6].map((o,i)=>`<button class="quizopt" onclick="answer(${i})">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}<div id="quizFeedback" class="feedback" role="status"></div>`;showView('lesson')}
+
+function openTopic(sid, tid) {
+  let s = subjects.find(x => x.id === sid);
+  let tp = s.topics.find(x => x[0] === tid);
+
+  currentTopic = { subject: s, topic: tp };
+
+  document.getElementById('lessonSubject').textContent = subjectName(s);
+  document.getElementById('lessonTitle').textContent = tp[1];
+  document.getElementById('lessonLevel').textContent =
+    t('level') + ': ' + tp[2];
+
+  let plan = learningPlan(s, tp);
+
+  let practice = plan.practice
+    .map((x, i) => `<li><strong>Task ${i + 1}:</strong> ${x}</li>`)
+    .join('');
+
+  let saved = localStorage.getItem('ef_project_' + sid + '_' + tid) || '';
+
+  document.getElementById('lessonContent').innerHTML = `
+    ${topicImages[tid] ? `
+      <figure class="topic-visual">
+        <img
+          src="${topicImages[tid].src}"
+          alt="${topicImages[tid].alt}"
+          loading="lazy"
+          onerror="this.parentElement.hidden=true"
+        >
+        <figcaption>${topicImages[tid].caption}</figcaption>
+      </figure>
+    ` : ''}
+
+    <h2>${tp[1]}</h2>
+    <h3>1. Understand the concept</h3>
+    <p>${tp[3]}</p>
+
+    <div class="callout">
+      <strong>Worked / real-world example</strong><br>
+      ${tp[4]}
+    </div>
+
+    <h3>2. Connect it to real life</h3>
+    <p>${plan.real}</p>
+
+    <h3>3. Guided practice</h3>
+    <ol>${practice}</ol>
+
+    <h3>4. Your subject project</h3>
+    <p>${plan.project}</p>
+    <p><strong>What to submit:</strong> ${plan.deliver}</p>
+
+    <h3>5. Project workspace</h3>
+    <p class="muted">
+      Write your plan, calculations, observations, story draft or project notes here.
+      It is saved only in this browser on this device.
+    </p>
+
+    <textarea id="projectWork" class="field" rows="7"
+      style="width:100%;resize:vertical"
+      placeholder="My project work…">${saved.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
+
+    <button class="btn small" style="margin-top:9px"
+      onclick="saveProjectWork()">Save my project work</button>
+
+    <span id="projectSaved" class="muted"
+      style="margin-left:10px" aria-live="polite"></span>
+
+    <h3>6. Reflect and improve</h3>
+    <ul>
+      <li>What did you understand best?</li>
+      <li>What evidence, calculation or example supports your answer?</li>
+      <li>What would you improve if you did this project again?</li>
+    </ul>
+
+    <p class="muted">
+      Complete the short quiz to check your understanding.
+      A project is a chance to practise and improve, not just to get a score.
+    </p>
+  `;
+
+  let isDone = done.includes(sid + ':' + tid);
+
+  document.getElementById('completeBtn').innerHTML =
+    isDone ? '✓ ' + t('complete') : '✓ ' + t('markDone');
+
+  document.getElementById('quizArea').innerHTML = `
+    <p><strong>${tp[5]}</strong></p>
+    ${tp[6].map((o, i) =>
+      `<button class="quizopt" onclick="answer(${i})">${String.fromCharCode(65 + i)}. ${o}</button>`
+    ).join('')}
+    <div id="quizFeedback" class="feedback" role="status"></div>
+  `;
+
+  showView('lesson');
+}
+
 function saveProjectWork(){if(!currentTopic)return;let key='ef_project_'+currentTopic.subject.id+'_'+currentTopic.topic[0];localStorage.setItem(key,document.getElementById('projectWork').value);document.getElementById('projectSaved').textContent='Saved on this device.'}
 function answer(i){let tp=currentTopic.topic,f=document.getElementById('quizFeedback');f.className='feedback show '+(i===tp[7]?'good':'bad');f.textContent=(i===tp[7]?t('correct'):t('tryAgain'))+tp[8];if(i===tp[7])completeTopic()}
 function completeTopic(){if(!currentTopic)return;let key=currentTopic.subject.id+':'+currentTopic.topic[0];if(!done.includes(key)){done.push(key);localStorage.setItem('ef_done',JSON.stringify(done));renderHome();renderProgress()}document.getElementById('completeBtn').innerHTML='✓ '+t('complete')}
