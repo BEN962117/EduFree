@@ -1,4 +1,5 @@
-const CACHE = 'edufree-shell-v5';
+
+const CACHE = 'edufree-shell-v6';
 const IMAGE_CACHE = 'edufree-topic-images-v1';
 
 const CORE = [
@@ -10,8 +11,10 @@ const CORE = [
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(CORE))
+    caches.open(CACHE)
+      .then(cache => cache.addAll(CORE))
   );
+
   self.skipWaiting();
 });
 
@@ -25,6 +28,7 @@ self.addEventListener('activate', event => {
       )
     )
   );
+
   self.clients.claim();
 });
 
@@ -34,14 +38,18 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
+
+  if (url.origin !== self.location.origin) return;
+
   const isTopicImage =
-    url.origin === self.location.origin &&
     url.pathname.includes('/assets/topic-images/');
 
+  // Images: use saved copies when available for offline learning.
   if (isTopicImage) {
     event.respondWith(
       caches.open(IMAGE_CACHE).then(async cache => {
         const cached = await cache.match(request);
+
         if (cached) return cached;
 
         try {
@@ -60,32 +68,62 @@ self.addEventListener('fetch', event => {
         }
       })
     );
+
     return;
   }
 
+  // Pages: check the network first so learners receive updates.
+  if (request.mode === 'navigate' ||
+      url.pathname.endsWith('.html') ||
+      url.pathname.endsWith('/')) {
+
+    event.respondWith(
+      (async () => {
+        const cache = await caches.open(CACHE);
+
+        try {
+          const response = await fetch(request);
+
+          if (response.ok) {
+            await cache.put(request, response.clone());
+          }
+
+          return response;
+        } catch {
+          return await cache.match(request) ||
+            await cache.match('./index.html') ||
+            new Response('You are offline. Please reconnect to load EduFree.', {
+              status: 503
+            });
+        }
+      })()
+    );
+
+    return;
+  }
+
+  // Other same-origin files: use cache first, then download.
   event.respondWith(
-    caches.match(request).then(async cached => {
+    (async () => {
+      const cache = await caches.open(CACHE);
+      const cached = await cache.match(request);
+
       if (cached) return cached;
 
       try {
         const response = await fetch(request);
 
-        if (response.ok && url.origin === self.location.origin) {
-          const copy = response.clone();
-          caches.open(CACHE).then(cache => cache.put(request, copy));
+        if (response.ok) {
+          await cache.put(request, response.clone());
         }
 
         return response;
       } catch {
-        if (request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
-
         return new Response('Offline', {
           status: 503,
           statusText: 'Offline'
         });
       }
-    })
+    })()
   );
 });
